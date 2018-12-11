@@ -112,8 +112,34 @@ public class GraphQLJpaSchemaBuilder implements GraphQLSchemaBuilder {
     @Override
     public GraphQLSchema build() {
         return GraphQLSchema.newSchema()
-            .query(getQueryType())
-            .build();
+                .query(getQueryType())
+                .mutation(getMutationType())
+                .build();
+    }
+
+    private GraphQLObjectType getMutationType() {
+        GraphQLObjectType.Builder queryType =
+                GraphQLObjectType.newObject()
+                        .name(this.name + "0mutation")
+                        .description(this.description + "0mutation");
+
+        queryType.fields(
+                entityManager.getMetamodel()
+                        .getEntities().stream()
+                        .filter(this::isNotIgnored)
+                        .map(this::getMutationFieldByIdDefinition)
+                        .collect(Collectors.toList())
+        );
+
+//        queryType.fields(
+//                entityManager.getMetamodel()
+//                        .getEntities().stream()
+//                        .filter(this::isNotIgnored)
+//                        .map(this::getQueryFieldSelectDefinition)
+//                        .collect(Collectors.toList())
+//        );
+
+        return queryType.build();
     }
 
     private GraphQLObjectType getQueryType() {
@@ -142,11 +168,19 @@ public class GraphQLJpaSchemaBuilder implements GraphQLSchemaBuilder {
     }
 
     private GraphQLFieldDefinition getQueryFieldByIdDefinition(EntityType<?> entityType) {
+        return doGetGraphQLFieldDefinitionById(entityType, new GraphQLJpaSimpleDataFetcher(entityManager, entityType));
+    }
+
+    private GraphQLFieldDefinition getMutationFieldByIdDefinition(EntityType<?> entityType) {
+        return doGetGraphQLFieldDefinitionById(entityType, new GraphQLJpaSimpleMutationDataFetcher(entityManager, entityType));
+    }
+
+    private GraphQLFieldDefinition doGetGraphQLFieldDefinitionById(EntityType<?> entityType, DataFetcher<?> dataFetcher) {
         return GraphQLFieldDefinition.newFieldDefinition()
                 .name(entityType.getName())
                 .description(getSchemaDescription( entityType.getJavaType()))
                 .type(getObjectType(entityType))
-                .dataFetcher(new GraphQLJpaSimpleDataFetcher(entityManager, entityType))
+                .dataFetcher(dataFetcher)
                 .argument(entityType.getAttributes().stream()
                     .filter(this::isValidInput)
                     .filter(this::isNotIgnored)
@@ -155,7 +189,7 @@ public class GraphQLJpaSchemaBuilder implements GraphQLSchemaBuilder {
                     .collect(Collectors.toList())
                 )
                 .build();
-    }    
+    }
 
     private GraphQLFieldDefinition getQueryFieldSelectDefinition(EntityType<?> entityType) {
         

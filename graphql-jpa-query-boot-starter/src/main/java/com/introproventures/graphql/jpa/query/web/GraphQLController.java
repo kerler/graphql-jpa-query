@@ -29,6 +29,7 @@ import graphql.ExecutionResult;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.MediaType;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  */
 @RestController
+@Transactional
 @ConditionalOnWebApplication
 @ConditionalOnClass(GraphQLExecutor.class)
 public class GraphQLController {
