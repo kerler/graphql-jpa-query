@@ -1,5 +1,6 @@
 package com.introproventures.graphql.jpa.query.schema.impl;
 
+import graphql.language.Argument;
 import graphql.language.Field;
 import graphql.schema.DataFetchingEnvironment;
 
@@ -9,6 +10,8 @@ import javax.persistence.NoResultException;
 import javax.persistence.metamodel.EntityType;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
+
+import java.util.List;
 
 public class GraphQLJpaSimpleMutationDataFetcher extends QraphQLJpaBaseDataFetcher {
     /**
@@ -25,7 +28,11 @@ public class GraphQLJpaSimpleMutationDataFetcher extends QraphQLJpaBaseDataFetch
     public Object get(DataFetchingEnvironment environment) {
         Field field = environment.getFields().iterator().next();
 
-        if( field.getArguments().isEmpty() ) {
+        if (field.getArguments().isEmpty()) {
+            return null;
+        }
+
+        if (! hasIdentityArgument(field.getArguments())) {
             return null;
         }
 
@@ -41,6 +48,13 @@ public class GraphQLJpaSimpleMutationDataFetcher extends QraphQLJpaBaseDataFetch
         }
 
         return null;
+    }
+
+    private boolean hasIdentityArgument(List<Argument> arguments) {
+        return arguments.stream()
+                .filter(iterArgument -> this.identityAttribute.getName().equals(iterArgument.getName()))
+                .findFirst()
+                .isPresent();
     }
 
     private void testUpdateAFieldValueInObject(Object singleResult) {

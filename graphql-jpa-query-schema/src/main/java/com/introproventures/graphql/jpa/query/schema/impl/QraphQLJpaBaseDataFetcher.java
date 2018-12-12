@@ -52,6 +52,7 @@ import javax.persistence.metamodel.SingularAttribute;
 
 import com.introproventures.graphql.jpa.query.annotation.GraphQLDefaultOrderBy;
 
+import com.introproventures.graphql.jpa.query.schema.impl.util.JpaMetaModelUtils;
 import graphql.GraphQLException;
 import graphql.execution.ValuesResolver;
 import graphql.language.Argument;
@@ -95,6 +96,7 @@ class QraphQLJpaBaseDataFetcher implements DataFetcher<Object> {
 
     protected final EntityManager entityManager;
     protected final EntityType<?> entityType;
+    protected final Attribute<?,?> identityAttribute;
 
     /**
      * Creates JPA entity DataFetcher instance
@@ -105,6 +107,7 @@ class QraphQLJpaBaseDataFetcher implements DataFetcher<Object> {
     public QraphQLJpaBaseDataFetcher(EntityManager entityManager, EntityType<?> entityType) {
         this.entityManager = entityManager;
         this.entityType = entityType;
+        this.identityAttribute = getIdentityAttribute(entityType);
     }
 
     @Override
@@ -805,6 +808,15 @@ class QraphQLJpaBaseDataFetcher implements DataFetcher<Object> {
             .map(it -> (Field) it)
             .filter(it -> fieldName.equals(it.getName()))
             .findFirst();
+    }
+
+    private Attribute<?,?> getIdentityAttribute(EntityType<?> entityType) {
+        return entityType.getAttributes().stream()
+//                .filter(JpaMetaModelUtils::isValidInput)
+//                .filter(JpaMetaModelUtils::isNotIgnored)
+                .filter(JpaMetaModelUtils::isIdentity)
+                .findFirst()
+                .get();
     }
 
     class NullValue implements Value {
