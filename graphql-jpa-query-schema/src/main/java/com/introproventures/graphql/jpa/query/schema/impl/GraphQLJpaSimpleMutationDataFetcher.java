@@ -47,8 +47,8 @@ public class GraphQLJpaSimpleMutationDataFetcher extends QraphQLJpaBaseDataFetch
 
         final Object singleResult = queryOrMakeSingleEntityObject(environment, field);
         setObjectAttributeValuesAccordingToArgumentValues(singleResult, environment, field.getArguments());
-
         entityManager.persist(singleResult);
+
         return singleResult;
     }
 
