@@ -18,15 +18,7 @@ package com.introproventures.graphql.jpa.query.example.model;
 
 import java.util.Set;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.OrderBy;
+import javax.persistence.*;
 
 import com.introproventures.graphql.jpa.query.annotation.GraphQLDescription;
 
@@ -44,6 +36,7 @@ import lombok.ToString;
 public abstract class Character {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @GraphQLDescription("Primary Key for the Character Class")
     String id;
 

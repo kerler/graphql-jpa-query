@@ -40,4 +40,22 @@ public class MyFieldUtils {
             return MyMethodUtils.getSetterMethodName(field.getName());
         }
     }
+
+
+//    public static Object FieldUtils_readField(final Object target, final String fieldName, final boolean forceAccess) {
+//        try {
+//            return FieldUtils.readField(target, fieldName, forceAccess);
+//        } catch (IllegalAccessException e) {
+//            throw new IllegalStateException(e);
+//        }
+//    }
+//
+//    public static void FieldUtils_writeField(final Object target, final String fieldName, Object value, final boolean forceAccess) {
+//        try {
+//            FieldUtils.writeField(target, fieldName, value, forceAccess);
+//        } catch (IllegalAccessException e) {
+//            throw new IllegalStateException(e);
+//        }
+//    }
+
 }
