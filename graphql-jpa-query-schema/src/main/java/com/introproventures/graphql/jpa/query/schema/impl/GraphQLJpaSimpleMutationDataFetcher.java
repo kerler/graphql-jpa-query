@@ -52,7 +52,7 @@ public class GraphQLJpaSimpleMutationDataFetcher extends QraphQLJpaBaseDataFetch
 
     private boolean hasIdentityArgument(List<Argument> arguments) {
         return arguments.stream()
-                .filter(iterArgument -> this.identityAttribute.getName().equals(iterArgument.getName()))
+                .filter(this::isIdendityArgument)
                 .findFirst()
                 .isPresent();
     }
@@ -66,7 +66,7 @@ public class GraphQLJpaSimpleMutationDataFetcher extends QraphQLJpaBaseDataFetch
         // Create entity graph from selection
         EntityGraph<?> entityGraph = buildEntityGraph(field);
 
-        return super.getQuery(environment, field, true)
+        return super.getQuery(environment, field, true, true)
                 .setHint("javax.persistence.fetchgraph", entityGraph)
                 .getSingleResult();
     }

@@ -41,7 +41,7 @@ class GraphQLJpaSimpleDataFetcher extends QraphQLJpaBaseDataFetcher {
                 // Create entity graph from selection
                 EntityGraph<?> entityGraph = buildEntityGraph(field);
                 
-                return super.getQuery(environment, field, true)
+                return super.getQuery(environment, field, true, false)
                     .setHint("javax.persistence.fetchgraph", entityGraph)
                     .getSingleResult();
                 

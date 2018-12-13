@@ -112,10 +112,10 @@ class QraphQLJpaBaseDataFetcher implements DataFetcher<Object> {
 
     @Override
     public Object get(DataFetchingEnvironment environment) {
-        return getQuery(environment, environment.getFields().iterator().next(), true).getResultList();
+        return getQuery(environment, environment.getFields().iterator().next(), true, false).getResultList();
     }
 
-    protected TypedQuery<?> getQuery(DataFetchingEnvironment environment, Field field, boolean isDistinct) {
+    protected TypedQuery<?> getQuery(DataFetchingEnvironment environment, Field field, boolean isDistinct, boolean inFieldArgumentsUseIdentityArgumentOnly) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<?> query = cb.createQuery((Class<?>) entityType.getJavaType());
         Root<?> from = query.from(entityType);
@@ -123,7 +123,7 @@ class QraphQLJpaBaseDataFetcher implements DataFetcher<Object> {
         from.alias(from.getModel().getName());
 
         // Build predicates from query arguments
-        List<Predicate> predicates =  getFieldArguments(field, query, cb, from)
+        List<Predicate> predicates =  getArgumentsFromFieldSelectionSetAndArguments(field, query, cb, from, inFieldArgumentsUseIdentityArgumentOnly)
             .stream()
             .map(it -> getPredicate(cb, from, from, environment, it))
             .filter(it -> it != null)
@@ -139,12 +139,33 @@ class QraphQLJpaBaseDataFetcher implements DataFetcher<Object> {
         return entityManager.createQuery(query.distinct(isDistinct));
     }
 
-    protected final List<Argument> getFieldArguments(Field field, CriteriaQuery<?> query, CriteriaBuilder cb, From<?,?> from) {
+    protected final List<Argument> getArgumentsFromFieldSelectionSetAndArguments(Field field, CriteriaQuery<?> query, CriteriaBuilder cb, From<?, ?> from, boolean inFieldArgumentsUseIdentityArgumentOnly) {
+        List<Argument> arguments = getArgumentsFromSelectionSet(field.getSelectionSet(), query, cb, from);
 
+        arguments.addAll(getArgumentsFromFieldArguments(field, inFieldArgumentsUseIdentityArgumentOnly));
+
+        return arguments;
+    }
+
+    private List<Argument> getArgumentsFromFieldArguments(Field field, boolean inFieldArgumentsUseIdentityArgumentOnly) {
+        if (inFieldArgumentsUseIdentityArgumentOnly) {
+            return field.getArguments().stream()
+                    .filter(this::isIdendityArgument)
+                    .collect(Collectors.toList());
+        } else {
+            return field.getArguments();
+        }
+    }
+
+    protected final boolean isIdendityArgument(Argument iterArgument) {
+        return this.identityAttribute.getName().equals(iterArgument.getName());
+    }
+
+    private List<Argument> getArgumentsFromSelectionSet(SelectionSet selectionSet, CriteriaQuery<?> query, CriteriaBuilder cb, From<?, ?> from) {
         List<Argument> arguments = new ArrayList<>();
 
         // Loop through all of the fields being requested
-        field.getSelectionSet().getSelections().forEach(selection -> {
+        selectionSet.getSelections().forEach(selection -> {
             if (selection instanceof Field) {
                 Field selectedField = (Field) selection;
 
@@ -177,8 +198,8 @@ class QraphQLJpaBaseDataFetcher implements DataFetcher<Object> {
                         // Check if it's an object and the foreign side is One.  Then we can eagerly fetch causing an inner join instead of 2 queries
                         if (fieldPath.getModel() instanceof SingularAttribute) {
                             SingularAttribute<?,?> attribute = (SingularAttribute<?,?>) fieldPath.getModel();
-                            if (attribute.getPersistentAttributeType() == Attribute.PersistentAttributeType.MANY_TO_ONE
-                                || attribute.getPersistentAttributeType() == Attribute.PersistentAttributeType.ONE_TO_ONE
+                            if (attribute.getPersistentAttributeType() == PersistentAttributeType.MANY_TO_ONE
+                                || attribute.getPersistentAttributeType() == PersistentAttributeType.ONE_TO_ONE
                             ) {
                                 from.fetch(selectedField.getName());
                             }
@@ -189,8 +210,6 @@ class QraphQLJpaBaseDataFetcher implements DataFetcher<Object> {
                 }
             }
         });
-
-        arguments.addAll(field.getArguments());
 
         return arguments;
     }

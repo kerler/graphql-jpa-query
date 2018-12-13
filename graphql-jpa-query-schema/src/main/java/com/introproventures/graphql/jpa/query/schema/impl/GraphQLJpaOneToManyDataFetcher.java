@@ -66,7 +66,7 @@ class GraphQLJpaOneToManyDataFetcher extends GraphQLJpaQueryDataFetcher {
 
             //EntityGraph<?> entityGraph = buildEntityGraph(new Field("select", new SelectionSet(Arrays.asList(field))));
             
-            return getQuery(environment, field, true)
+            return getQuery(environment, field, true, false)
                 //.setHint("javax.persistence.fetchgraph", entityGraph) // TODO: fix runtime exception
                 .getResultList();
         }
@@ -104,7 +104,7 @@ class GraphQLJpaOneToManyDataFetcher extends GraphQLJpaQueryDataFetcher {
     }    
     @SuppressWarnings( { "rawtypes", "unchecked" } )
     @Override
-    protected TypedQuery<?> getQuery(DataFetchingEnvironment environment, Field field, boolean isDistinct) {
+    protected TypedQuery<?> getQuery(DataFetchingEnvironment environment, Field field, boolean isDistinct, boolean inFieldArgumentsUseIdentityArgumentOnly) {
         
         Object source = environment.getSource();
         
@@ -126,7 +126,7 @@ class GraphQLJpaOneToManyDataFetcher extends GraphQLJpaQueryDataFetcher {
         query.select(join.alias(attribute.getName()));
         //query.multiselect(from.alias("owner"), join.alias(attribute.getName()));
         
-        List<Predicate> predicates = getFieldArguments(field, query, cb, join).stream()
+        List<Predicate> predicates = getArgumentsFromFieldSelectionSetAndArguments(field, query, cb, join, inFieldArgumentsUseIdentityArgumentOnly).stream()
             .map(it -> getPredicate(cb, from, join, environment, it))
             .filter(it -> it != null)
             .collect(Collectors.toList());

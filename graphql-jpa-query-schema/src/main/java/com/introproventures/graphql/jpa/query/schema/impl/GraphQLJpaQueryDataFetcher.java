@@ -100,7 +100,7 @@ class GraphQLJpaQueryDataFetcher extends QraphQLJpaBaseDataFetcher {
             
             queryField = new Field(fieldName, field.getArguments(), recordsSelection.get().getSelectionSet());
             
-            TypedQuery<?> query = getQuery(queryEnvironment, queryField, isDistinct);
+            TypedQuery<?> query = getQuery(queryEnvironment, queryField, isDistinct, false);
             
             // Let's apply page only if present
             if(pageArgument.isPresent()) {
