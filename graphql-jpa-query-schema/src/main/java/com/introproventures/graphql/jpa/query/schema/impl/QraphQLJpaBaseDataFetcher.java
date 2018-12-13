@@ -150,15 +150,19 @@ class QraphQLJpaBaseDataFetcher implements DataFetcher<Object> {
     private List<Argument> getArgumentsFromFieldArguments(Field field, boolean inFieldArgumentsUseIdentityArgumentOnly) {
         if (inFieldArgumentsUseIdentityArgumentOnly) {
             return field.getArguments().stream()
-                    .filter(this::isIdendityArgument)
+                    .filter(this::isIdentityArgument)
                     .collect(Collectors.toList());
         } else {
             return field.getArguments();
         }
     }
 
-    protected final boolean isIdendityArgument(Argument iterArgument) {
-        return this.identityAttribute.getName().equals(iterArgument.getName());
+    protected final boolean isIdentityArgument(Argument argument) {
+        return this.identityAttribute.getName().equals(argument.getName());
+    }
+
+    protected final boolean isNotIdentityArgument(Argument iterArgument) {
+        return ! isIdentityArgument(iterArgument);
     }
 
     private List<Argument> getArgumentsFromSelectionSet(SelectionSet selectionSet, CriteriaQuery<?> query, CriteriaBuilder cb, From<?, ?> from) {
