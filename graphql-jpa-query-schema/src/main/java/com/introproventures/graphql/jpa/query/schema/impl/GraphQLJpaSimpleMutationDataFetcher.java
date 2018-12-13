@@ -103,10 +103,11 @@ public class GraphQLJpaSimpleMutationDataFetcher extends QraphQLJpaBaseDataFetch
     }
 
     private void setBasicTypeFieldValue(Object bean, java.lang.reflect.Field field, Object fieldValue) {
-        //FIXME: Should use Joda lib which can handle Date value well.
+        //FIXME: Should use Joda lib which can handle Date type well.
         String[] pattern = new String[]{"yyyy-MM", "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss"};
 
         try {
+            //FIXME: Should not use 'field.getName().equals("id")' to check whether it is identity field.
             if (String.class.isAssignableFrom(field.getType()) && !field.getName().equals("id")) {
                 MyFieldUtils.writeFieldUsingSetterMethod(bean, field, fieldValue);
             } else if (Date.class.isAssignableFrom(field.getType())) {
@@ -116,9 +117,8 @@ public class GraphQLJpaSimpleMutationDataFetcher extends QraphQLJpaBaseDataFetch
                 Date dateValue = DateUtils.parseDate(fieldValue.toString(), pattern);
                 MyFieldUtils.writeFieldUsingSetterMethod(bean, field, dateValue);
             } else if (Integer.class.isAssignableFrom(field.getType())) {
-                //FIXME: Here convert from String to double then convert to int. Why not directly convert from String to int?
-                //FIXME: Many similar problems in source code below.
-                MyFieldUtils.writeFieldUsingSetterMethod(bean, field, NumberUtils.createDouble(fieldValue.toString()).intValue());
+                //FIXME: Should use code similar to QraphQLJpaBaseDataFetcher::convertValue() to set field values.
+                MyFieldUtils.writeFieldUsingSetterMethod(bean, field, NumberUtils.createInteger(fieldValue.toString()));
             } else if (Boolean.class.isAssignableFrom(field.getType())) {
                 MyFieldUtils.writeFieldUsingSetterMethod(bean, field, BooleanUtils.toBooleanObject(fieldValue.toString()));
             } else if (BigDecimal.class.isAssignableFrom(field.getType())) {
@@ -128,11 +128,11 @@ public class GraphQLJpaSimpleMutationDataFetcher extends QraphQLJpaBaseDataFetch
             } else if (Float.class.isAssignableFrom(field.getType())) {
                 MyFieldUtils.writeFieldUsingSetterMethod(bean, field, NumberUtils.createFloat(fieldValue.toString()));
             } else if (Long.class.isAssignableFrom(field.getType())) {
-                MyFieldUtils.writeFieldUsingSetterMethod(bean, field, NumberUtils.createDouble(fieldValue.toString()).longValue());
+                MyFieldUtils.writeFieldUsingSetterMethod(bean, field, NumberUtils.createLong(fieldValue.toString()));
             } else if (Short.class.isAssignableFrom(field.getType())) {
-                MyFieldUtils.writeFieldUsingSetterMethod(bean, field, NumberUtils.createDouble(fieldValue.toString()).shortValue());
+                MyFieldUtils.writeFieldUsingSetterMethod(bean, field, NumberUtils.createInteger(fieldValue.toString()).shortValue());
             } else if (Byte.class.isAssignableFrom(field.getType())) {
-                MyFieldUtils.writeFieldUsingSetterMethod(bean, field, NumberUtils.createDouble(fieldValue.toString()).byteValue());
+                MyFieldUtils.writeFieldUsingSetterMethod(bean, field, NumberUtils.createInteger(fieldValue.toString()).byteValue());
             } else if (BigInteger.class.isAssignableFrom(field.getType())) {
                 MyFieldUtils.writeFieldUsingSetterMethod(bean, field, NumberUtils.createBigInteger(fieldValue.toString()));
             }
