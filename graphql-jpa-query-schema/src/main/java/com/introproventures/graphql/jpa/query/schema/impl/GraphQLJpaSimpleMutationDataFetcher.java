@@ -73,22 +73,24 @@ public class GraphQLJpaSimpleMutationDataFetcher extends QraphQLJpaBaseDataFetch
 
         arguments.stream()
                 .filter(this::isNotIdentityArgument)
-                .forEach(iterArgument -> updateASingleAttributeOfObject(singleResult, environment, iterArgument));
+                .forEach(iterArgument -> setAnAttributeValueOfObject(singleResult, environment, iterArgument));
     }
 
-    private void updateASingleAttributeOfObject(Object singleResult, DataFetchingEnvironment environment, Argument argument) {
+    private void setAnAttributeValueOfObject(Object singleResult, DataFetchingEnvironment environment, Argument argument) {
         final Attribute<?, ?> attribute = this.entityType.getAttribute(argument.getName());
         if (Objects.isNull(attribute)) {
             throw new IllegalArgumentException("Entity type '" + entityType.getName() + "' has no attribute named '" + argument.getName() + "'.");
         }
 
         final java.lang.reflect.Field field = FieldUtils.getField(singleResult.getClass(), argument.getName(), true);
+        final Object valueWithJavaType = convertValue(environment, argument, argument.getValue());
 
         if (isPrimitiveOrWrapperOrOtherBasicType(attribute.getJavaType())) {
-            setBasicTypeFieldValue(singleResult, field, convertValue(environment, argument, argument.getValue()));
+            setBasicTypeFieldValue(singleResult, field, valueWithJavaType);
+        } else {
+            throw new IllegalArgumentException("Can not update entity attribute value using value '" + valueWithJavaType
+                    + "' with type '" + valueWithJavaType.getClass().getName() + "'.");
         }
-
-//        FieldUtils_writeField(singleResult, "homePlanet", "LBG", true);
     }
 
     private void setBasicTypeFieldValue(Object bean, java.lang.reflect.Field field, Object fieldValue) {
