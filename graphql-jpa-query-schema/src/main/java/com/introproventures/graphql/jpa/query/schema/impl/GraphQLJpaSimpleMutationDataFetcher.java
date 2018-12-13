@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import com.introproventures.graphql.jpa.query.schema.impl.util.FieldUtil;
+import com.introproventures.graphql.jpa.query.schema.impl.util.MyFieldUtils;
 
 public class GraphQLJpaSimpleMutationDataFetcher extends QraphQLJpaBaseDataFetcher {
     /**
@@ -49,8 +49,8 @@ public class GraphQLJpaSimpleMutationDataFetcher extends QraphQLJpaBaseDataFetch
         }
 
         try {
-            final Object singleResult = getObjectFromDB(environment, field);
-            testUpdateAFieldValueInObject(singleResult, environment, field);
+            final Object singleResult = querySingleEntityObject(environment, field);
+            setObjectAttributeValuesAccordingToArgumentValues(singleResult, environment, field.getArguments());
 
             entityManager.persist(singleResult);
             return singleResult;
@@ -69,9 +69,9 @@ public class GraphQLJpaSimpleMutationDataFetcher extends QraphQLJpaBaseDataFetch
                 .isPresent();
     }
 
-    private void testUpdateAFieldValueInObject(Object singleResult, DataFetchingEnvironment environment, Field field) {
+    private void setObjectAttributeValuesAccordingToArgumentValues(Object singleResult, DataFetchingEnvironment environment, List<Argument> arguments) {
 
-        field.getArguments().stream()
+        arguments.stream()
                 .filter(this::isNotIdentityArgument)
                 .forEach(iterArgument -> updateASingleAttributeOfObject(singleResult, environment, iterArgument));
     }
@@ -85,42 +85,45 @@ public class GraphQLJpaSimpleMutationDataFetcher extends QraphQLJpaBaseDataFetch
         final java.lang.reflect.Field field = FieldUtils.getField(singleResult.getClass(), argument.getName(), true);
 
         if (isPrimitiveOrWrapperOrOtherBasicType(attribute.getJavaType())) {
-            handleBasicObject(singleResult, field, convertValue(environment, argument, argument.getValue()));
+            setBasicTypeFieldValue(singleResult, field, convertValue(environment, argument, argument.getValue()));
         }
 
 //        FieldUtils_writeField(singleResult, "homePlanet", "LBG", true);
     }
 
-    private void handleBasicObject(Object bean, java.lang.reflect.Field field, Object fieldValue) {
+    private void setBasicTypeFieldValue(Object bean, java.lang.reflect.Field field, Object fieldValue) {
+        //FIXME: Should use Joda lib which can handle Date value well.
         String[] pattern = new String[]{"yyyy-MM", "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss"};
 
         try {
             if (String.class.isAssignableFrom(field.getType()) && !field.getName().equals("id")) {
-                FieldUtil.writeField(bean, field, fieldValue);
+                MyFieldUtils.writeFieldUsingSetterMethod(bean, field, fieldValue);
             } else if (Date.class.isAssignableFrom(field.getType())) {
                 if (fieldValue.toString().contains("Z")) {
                     fieldValue = fieldValue.toString().substring(0, 10);
                 }
                 Date dateValue = DateUtils.parseDate(fieldValue.toString(), pattern);
-                FieldUtil.writeField(bean, field, dateValue);
+                MyFieldUtils.writeFieldUsingSetterMethod(bean, field, dateValue);
             } else if (Integer.class.isAssignableFrom(field.getType())) {
-                FieldUtil.writeField(bean, field, NumberUtils.createDouble(fieldValue.toString()).intValue());
+                //FIXME: Here convert from String to double then convert to int. Why not directly convert from String to int?
+                //FIXME: Many similar problems in source code below.
+                MyFieldUtils.writeFieldUsingSetterMethod(bean, field, NumberUtils.createDouble(fieldValue.toString()).intValue());
             } else if (Boolean.class.isAssignableFrom(field.getType())) {
-                FieldUtil.writeField(bean, field, BooleanUtils.toBooleanObject(fieldValue.toString()));
+                MyFieldUtils.writeFieldUsingSetterMethod(bean, field, BooleanUtils.toBooleanObject(fieldValue.toString()));
             } else if (BigDecimal.class.isAssignableFrom(field.getType())) {
-                FieldUtil.writeField(bean, field, NumberUtils.createBigDecimal(fieldValue.toString()));
+                MyFieldUtils.writeFieldUsingSetterMethod(bean, field, NumberUtils.createBigDecimal(fieldValue.toString()));
             } else if (Double.class.isAssignableFrom(field.getType())) {
-                FieldUtil.writeField(bean, field, NumberUtils.createDouble(fieldValue.toString()));
+                MyFieldUtils.writeFieldUsingSetterMethod(bean, field, NumberUtils.createDouble(fieldValue.toString()));
             } else if (Float.class.isAssignableFrom(field.getType())) {
-                FieldUtil.writeField(bean, field, NumberUtils.createFloat(fieldValue.toString()));
+                MyFieldUtils.writeFieldUsingSetterMethod(bean, field, NumberUtils.createFloat(fieldValue.toString()));
             } else if (Long.class.isAssignableFrom(field.getType())) {
-                FieldUtil.writeField(bean, field, NumberUtils.createDouble(fieldValue.toString()).longValue());
+                MyFieldUtils.writeFieldUsingSetterMethod(bean, field, NumberUtils.createDouble(fieldValue.toString()).longValue());
             } else if (Short.class.isAssignableFrom(field.getType())) {
-                FieldUtil.writeField(bean, field, NumberUtils.createDouble(fieldValue.toString()).shortValue());
+                MyFieldUtils.writeFieldUsingSetterMethod(bean, field, NumberUtils.createDouble(fieldValue.toString()).shortValue());
             } else if (Byte.class.isAssignableFrom(field.getType())) {
-                FieldUtil.writeField(bean, field, NumberUtils.createDouble(fieldValue.toString()).byteValue());
+                MyFieldUtils.writeFieldUsingSetterMethod(bean, field, NumberUtils.createDouble(fieldValue.toString()).byteValue());
             } else if (BigInteger.class.isAssignableFrom(field.getType())) {
-                FieldUtil.writeField(bean, field, NumberUtils.createBigInteger(fieldValue.toString()));
+                MyFieldUtils.writeFieldUsingSetterMethod(bean, field, NumberUtils.createBigInteger(fieldValue.toString()));
             }
         } catch (ParseException e) {
             throw new IllegalArgumentException(e);
@@ -135,7 +138,7 @@ public class GraphQLJpaSimpleMutationDataFetcher extends QraphQLJpaBaseDataFetch
                 || BigInteger.class.isAssignableFrom(clazz);
     }
 
-    private Object getObjectFromDB(DataFetchingEnvironment environment, Field field) {
+    private Object querySingleEntityObject(DataFetchingEnvironment environment, Field field) {
         // Create entity graph from selection
         EntityGraph<?> entityGraph = buildEntityGraph(field);
 

@@ -1,6 +1,6 @@
 package com.introproventures.graphql.jpa.query.schema.impl.util;
 
-public class MethodUtil {
+public class MyMethodUtils {
     public static String getGetterMethodName(String property, String javaType) {
         StringBuilder sb = new StringBuilder();
         sb.append(property);
