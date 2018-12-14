@@ -54,10 +54,16 @@ public class GraphQLJpaSimpleMutationDataFetcher extends QraphQLJpaBaseDataFetch
 
     private Object queryOrMakeSingleEntityObject(DataFetchingEnvironment environment, Field field) {
         if (hasIdentityArgument(field.getArguments())) {
-            //TODO: Should make sure exact one result is returned. 'javax.persistence.NoResultException' may be thrown.
-            return querySingleEntityObject(environment, field);
+            final Object queriedSingleEntityObject = querySingleEntityObject(environment, field);
+            if (Objects.nonNull(queriedSingleEntityObject)) {
+                return queriedSingleEntityObject;
+            }
         }
 
+        return makeSingleEntityObject();
+    }
+
+    private Object makeSingleEntityObject() {
         try {
             return ConstructorUtils.invokeConstructor(entityType.getJavaType());
         } catch (NoSuchMethodException e) {
@@ -81,7 +87,7 @@ public class GraphQLJpaSimpleMutationDataFetcher extends QraphQLJpaBaseDataFetch
     private void setObjectAttributeValuesAccordingToArgumentValues(Object singleResult, DataFetchingEnvironment environment, List<Argument> arguments) {
 
         arguments.stream()
-                .filter(this::isNotIdentityArgument)
+//                .filter(this::isNotIdentityArgument)
                 .forEach(iterArgument -> setAnAttributeValueOfObject(singleResult, environment, iterArgument));
     }
 
@@ -119,9 +125,14 @@ public class GraphQLJpaSimpleMutationDataFetcher extends QraphQLJpaBaseDataFetch
         // Create entity graph from selection
         EntityGraph<?> entityGraph = buildEntityGraph(field);
 
-        return super.getQuery(environment, field, true, true)
+        final List<?> resultList = super.getQuery(environment, field, true, true)
                 .setHint("javax.persistence.fetchgraph", entityGraph)
-                .getSingleResult();
-    }
+                .getResultList();
 
+        if (resultList.size() > 1) {
+            throw new IllegalArgumentException("Should not get more than one result. Actual number of result is '" + resultList.size() + "'.");
+        }
+
+        return (resultList.isEmpty()) ? null : resultList.get(0);
+    }
 }
