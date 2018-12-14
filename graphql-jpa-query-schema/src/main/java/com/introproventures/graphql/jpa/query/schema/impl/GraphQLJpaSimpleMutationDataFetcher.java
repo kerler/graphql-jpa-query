@@ -9,17 +9,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ClassUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.apache.commons.lang3.time.DateUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -110,7 +106,7 @@ public class GraphQLJpaSimpleMutationDataFetcher extends QraphQLJpaBaseDataFetch
 
     private void setBasicTypeFieldValue(Object bean, java.lang.reflect.Field field, Object fieldValue) {
         //TODO: Need to add test cases to test each possible type of java.lang.reflect.Field.
-        MyFieldUtils.writeFieldUsingSetterMethod(bean, field, fieldValue);
+        MyFieldUtils.writeFieldUsingSetterMethodThenUsingFieldWritting(bean, field, fieldValue);
     }
 
     private boolean isPrimitiveOrWrapperOrOtherBasicType (Class<?> clazz) {

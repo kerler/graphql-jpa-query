@@ -1,5 +1,6 @@
 package com.introproventures.graphql.jpa.query.schema.impl.util;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
 
 import java.beans.IntrospectionException;
@@ -19,15 +20,19 @@ public class MyFieldUtils {
      * @param fieldValue
      * @return
      */
-    public static Object writeFieldUsingSetterMethod(Object object, Field field, Object fieldValue) {
-        try {
-            String methodName = getSetterMethodName(object, field);
+    public static void writeFieldUsingSetterMethodThenUsingFieldWritting(Object object, Field field, Object fieldValue) {
+        String methodName = getSetterMethodName(object, field);
 
-            return MethodUtils.invokeMethod(object, true, methodName, fieldValue);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException(e);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
+        try {
+             MethodUtils.invokeMethod(object, true, methodName, fieldValue);
+        } /*catch (NoSuchMethodException noSuchMethodException) {
+
+        }*/ catch (Exception e) {
+            try {
+                FieldUtils.writeField(object, field.getName(), fieldValue, true);
+            } catch (IllegalAccessException illegalAccessException ) {
+                throw new IllegalArgumentException("Method '" + methodName + "' can not be invoked, and field '" + field.getName() + "' can not be directly set value.");
+            }
         }
     }
 
