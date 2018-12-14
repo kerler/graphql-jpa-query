@@ -835,7 +835,7 @@ class QraphQLJpaBaseDataFetcher implements DataFetcher<Object> {
 
     private Attribute<?,?> getIdentityAttribute(EntityType<?> entityType) {
         return entityType.getAttributes().stream()
-//                .filter(JpaMetaModelUtils::isValidInput)
+//                .filter(JpaMetaModelUtils::isBasicOrElementCollection)
 //                .filter(JpaMetaModelUtils::isNotIgnored)
                 .filter(JpaMetaModelUtils::isIdentity)
                 .findFirst()

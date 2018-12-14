@@ -61,7 +61,7 @@ public class JpaMetaModelUtils {
         		|| attribute.getPersistentAttributeType() == Attribute.PersistentAttributeType.ONE_TO_ONE;
     }
 
-    public static boolean isValidInput(Attribute<?,?> attribute) {
+    public static boolean isBasicOrElementCollection(Attribute<?,?> attribute) {
         return attribute.getPersistentAttributeType() == Attribute.PersistentAttributeType.BASIC ||
                 attribute.getPersistentAttributeType() == Attribute.PersistentAttributeType.ELEMENT_COLLECTION;
     }
