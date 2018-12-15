@@ -1,5 +1,6 @@
 package com.introproventures.graphql.jpa.query.schema.impl;
 
+import com.introproventures.graphql.jpa.query.schema.impl.visitor.VisitorToCopyFieldValueRecursively;
 import graphql.language.Argument;
 import graphql.language.Field;
 import graphql.schema.DataFetchingEnvironment;
@@ -37,15 +38,25 @@ public class GraphQLJpaSimpleMutationDataFetcher extends QraphQLJpaBaseDataFetch
     public Object get(DataFetchingEnvironment environment) {
         Field field = environment.getFields().iterator().next();
 
-        if (field.getArguments().isEmpty()) {
-            throw new IllegalArgumentException("Arguments should not be empty.");
-        }
+//        if (field.getArguments().isEmpty()) {
+//            throw new IllegalArgumentException("Arguments should not be empty.");
+//        }
+
+        testConvertArgumentValues(environment, field);
 
         final Object singleResult = queryOrMakeSingleEntityObject(environment, field);
         setObjectAttributeValuesAccordingToArgumentValues(singleResult, environment, field.getArguments());
         entityManager.persist(singleResult);
 
         return singleResult;
+    }
+
+    private void testConvertArgumentValues(DataFetchingEnvironment environment, Field field) {
+        final VisitorToCopyFieldValueRecursively visitorToCopyFieldValueRecursively = new VisitorToCopyFieldValueRecursively();
+        for (Argument argument : field.getArguments()) {
+            final Object o = convertValue(environment, argument, argument.getValue());
+            int i = 0;
+        }
     }
 
     private Object queryOrMakeSingleEntityObject(DataFetchingEnvironment environment, Field field) {

@@ -553,15 +553,6 @@ public class GraphQLJpaSchemaBuilder implements GraphQLSchemaBuilder {
                 )
                 .build();
 
-//        GraphQLObjectTypeWithInputTypeSupport graphQLObjectTypeWithInputTypeSupport = new GraphQLObjectTypeWithInputTypeSupport(
-//                objectType.getName()
-//                , objectType.getDescription()
-//                , objectType.getFieldDefinitions()
-//                , objectType.getInterfaces()
-//                , objectType.getDirectives()
-//                , objectType.getDefinition()
-//        );
-
         entityCacheForInputObjectType.putIfAbsent(entityType, objectType);
 
         return objectType;
