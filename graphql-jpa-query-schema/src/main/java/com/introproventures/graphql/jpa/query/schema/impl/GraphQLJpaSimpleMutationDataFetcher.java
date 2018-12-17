@@ -95,7 +95,6 @@ public class GraphQLJpaSimpleMutationDataFetcher extends QraphQLJpaBaseDataFetch
 
     private void setAnAttributeValueOfObject(Object singleResult, DataFetchingEnvironment environment, Argument argument) {
 
-        final java.lang.reflect.Field field = FieldUtils.getField(singleResult.getClass(), argument.getName(), true);
         final Object valueWithJavaType = convertValue(environment, argument, argument.getValue());
         final GraphQLInputType graphQLInputType = environment.getFieldDefinition().getArgument(argument.getName()).getType();
 
