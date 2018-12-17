@@ -102,6 +102,7 @@ public class GraphQLJpaSimpleMutationDataFetcher extends QraphQLJpaBaseDataFetch
                 valueWithJavaType
                 , new VisitorToCopyFieldValueRecursively.Parameters(
                         graphQLInputType
+                        , this.entityManager
                         , this.entityType
                         , argument.getName()
                         , singleResult));
