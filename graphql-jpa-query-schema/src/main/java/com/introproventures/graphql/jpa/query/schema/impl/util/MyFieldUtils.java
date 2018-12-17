@@ -20,8 +20,12 @@ public class MyFieldUtils {
      * @param fieldValue
      * @return
      */
-    public static void writeFieldUsingSetterMethodThenUsingFieldWritting(Object object, Field field, Object fieldValue) {
-        String methodName = getSetterMethodName(object, field);
+    public static void writeFieldUsingSetterMethodThenUsingFieldWriting(Object object, Field field, Object fieldValue) {
+        writeFieldUsingSetterMethodThenUsingFieldWriting(object, field.getName(), fieldValue);
+    }
+
+    public static void writeFieldUsingSetterMethodThenUsingFieldWriting(Object object, String fieldName, Object fieldValue) {
+        String methodName = getSetterMethodName(object, fieldName);
 
         try {
              MethodUtils.invokeMethod(object, true, methodName, fieldValue);
@@ -29,20 +33,24 @@ public class MyFieldUtils {
 
         }*/ catch (Exception e) {
             try {
-                FieldUtils.writeField(object, field.getName(), fieldValue, true);
+                FieldUtils.writeField(object, fieldName, fieldValue, true);
             } catch (IllegalAccessException illegalAccessException ) {
-                throw new IllegalArgumentException("Method '" + methodName + "' can not be invoked, and field '" + field.getName() + "' can not be directly set value.");
+                throw new IllegalArgumentException("Method '" + methodName + "' can not be invoked, and field '" + fieldName + "' can not be directly set value.");
             }
         }
     }
 
-    private static String getSetterMethodName(Object object, Field field) {
+    public static String getSetterMethodName(Object object, Field field) {
+        return getSetterMethodName(object, field.getName());
+    }
+
+    public static String getSetterMethodName(Object object, String fieldName) {
         try {
-            PropertyDescriptor pd = new PropertyDescriptor(field.getName(), object.getClass());
+            PropertyDescriptor pd = new PropertyDescriptor(fieldName, object.getClass());
             Method setMethod = pd.getWriteMethod(); // This way can get public setter method only.
             return setMethod.getName();
         } catch (IntrospectionException e) {
-            return MyMethodUtils.getSetterMethodName(field.getName());
+            return MyMethodUtils.getSetterMethodName(fieldName);
         }
     }
 
