@@ -14,6 +14,7 @@ import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class VisitorToCopyFieldValueRecursively extends AbstractVisitorToVisitEachObjectNoMoreThanOnce {
@@ -76,9 +77,8 @@ public class VisitorToCopyFieldValueRecursively extends AbstractVisitorToVisitEa
         }
 
         if (! attribute.isCollection()) {
-            final ObjectValue objectValue = (ObjectValue) fieldValue;
-            final Value droidId = objectValue.getObjectFields().get(0).getValue();
-            final String strDroidId = ((StringValue) droidId).getValue();
+            final Map<?, ?> map = (Map<?, ?>) fieldValue;
+            final Object strDroidId = map.get("id"); //FIXME: Use EntityType to find identity field.
             final Object objectFromDB = wrapperToTargetObject.parameters.entityManager.find(attribute.getJavaType(), strDroidId);
             setFieldValue(wrapperToTargetObject.parameters.targetObject, wrapperToTargetObject.parameters.targetFieldName, objectFromDB);
             return false;

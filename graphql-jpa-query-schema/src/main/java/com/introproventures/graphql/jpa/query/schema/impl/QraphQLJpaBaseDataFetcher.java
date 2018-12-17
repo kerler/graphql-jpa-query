@@ -19,16 +19,7 @@ import static graphql.introspection.Introspection.SchemaMetaFieldDef;
 import static graphql.introspection.Introspection.TypeMetaFieldDef;
 import static graphql.introspection.Introspection.TypeNameMetaFieldDef;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -572,54 +563,72 @@ class QraphQLJpaBaseDataFetcher implements DataFetcher<Object> {
 
     @SuppressWarnings( { "unchecked", "rawtypes" } )
     protected Object convertValue(DataFetchingEnvironment environment, Argument argument, Value value) {
+
         if (value instanceof NullValue) {
             return null;
-        } else if (value instanceof StringValue) {
+        }
+
+        if (value instanceof StringValue) {
             Object convertedValue =  environment.getArgument(argument.getName());
-            if (convertedValue != null) {
-                // Return real typed resolved value even if the Value is a StringValue
-                return convertedValue;
+            if (Objects.nonNull(convertedValue)) {
+                return convertedValue; // Return real typed resolved value even if the Value is a StringValue
             } else {
-                // Return provided StringValue
-                return ((StringValue) value).getValue();
+                return ((StringValue) value).getValue(); // Return provided StringValue
             }
         }
-        else if (value instanceof VariableReference)
-            // Get resolved variable in environment arguments
-            return environment.getArguments().get(argument.getName());
-        else if (value instanceof ArrayValue) {
+
+        if (value instanceof VariableReference) {
+            return environment.getArguments().get(argument.getName()); // Get resolved variable in environment arguments
+        }
+
+        if (value instanceof ObjectValue) {
+            return environment.getArguments().get(argument.getName()); // Get resolved variable in environment arguments
+        }
+
+        if (value instanceof ArrayValue) {
             Object convertedValue =  environment.getArgument(argument.getName());
-            if (convertedValue != null) {
+
+            if (Objects.nonNull(convertedValue)) {
+
                 // unwrap [[EnumValue{name='value'}]]
                 if(convertedValue instanceof Collection
                     && ((Collection) convertedValue).stream().allMatch(it->it instanceof Collection)) {
+
                     convertedValue = ((Collection) convertedValue).iterator().next();
                 }
 
                 if(convertedValue instanceof Collection
                     && ((Collection) convertedValue).stream().anyMatch(it->it instanceof Value)) {
+
                     return ((Collection) convertedValue).stream()
                         .map((it) -> convertValue(environment, argument, (Value) it))
                         .collect(Collectors.toList());
                 }
-                // Return real typed resolved array value
-                return convertedValue;
+
+                return convertedValue; // Return real typed resolved array value
+
             } else {
                 // Wrap converted values in ArrayList
                 return ((ArrayValue) value).getValues().stream()
                     .map((it) -> convertValue(environment, argument, it))
                     .collect(Collectors.toList());
             }
-
         }
-        else if (value instanceof EnumValue) {
+
+        if (value instanceof EnumValue) {
             Class enumType = getJavaType(environment, argument);
             return Enum.valueOf(enumType, ((EnumValue) value).getName());
-        } else if (value instanceof IntValue) {
+        }
+
+        if (value instanceof IntValue) {
             return ((IntValue) value).getValue();
-        } else if (value instanceof BooleanValue) {
+        }
+
+        if (value instanceof BooleanValue) {
             return ((BooleanValue) value).isValue();
-        } else if (value instanceof FloatValue) {
+        }
+
+        if (value instanceof FloatValue) {
             return ((FloatValue) value).getValue();
         }
 
