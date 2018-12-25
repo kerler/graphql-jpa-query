@@ -1,0 +1,15 @@
+
+description = 'graphql-jpa-query-schema'
+dependencies {
+  compile project(':graphql-jpa-query-dependencies:graphql-jpa-query-annotations')
+    compile group: 'com.graphql-java', name: 'graphql-java', version:'9.4'
+    compile group: 'org.atteo', name: 'evo-inflector', version:'1.2.2'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version:'3.5'
+    compile group: 'org.slf4j', name: 'slf4j-api', version:'1.7.25'
+    compile group: 'joda-time', name: 'joda-time', version:'2.9.9'
+    compile group: 'org.hibernate.javax.persistence', name: 'hibernate-jpa-2.1-api', version:'1.0.0.Final'
+    compile group: 'javax.transaction', name: 'javax.transaction-api', version:'1.2'
+    compile group: 'javax.interceptor', name: 'javax.interceptor-api', version:'1.2.1'
+    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version:'1.5.9.RELEASE'
+    system group: 'com.github.behaim', name: 'behaim', version:'0.1.0-SNAPSHOT'
+}

@@ -1,0 +1,14 @@
+rootProject.name = 'graphql-jpa-query'
+include ':graphql-jpa-query-dependencies:graphql-jpa-query-annotations'
+include ':graphql-jpa-query-dependencies:graphql-jpa-query-build:graphql-jpa-query-schema'
+include ':graphql-jpa-query-dependencies:graphql-jpa-query-build:graphql-jpa-query-boot-starter'
+include ':graphql-jpa-query-dependencies:graphql-jpa-query-build:graphql-jpa-query-example'
+include ':graphql-jpa-query-dependencies'
+include ':graphql-jpa-query-dependencies:graphql-jpa-query-build'
+
+project(':graphql-jpa-query-dependencies:graphql-jpa-query-annotations').projectDir = "$rootDir/graphql-jpa-query-annotations" as File
+project(':graphql-jpa-query-dependencies:graphql-jpa-query-build:graphql-jpa-query-schema').projectDir = "$rootDir/graphql-jpa-query-schema" as File
+project(':graphql-jpa-query-dependencies:graphql-jpa-query-build:graphql-jpa-query-boot-starter').projectDir = "$rootDir/graphql-jpa-query-boot-starter" as File
+project(':graphql-jpa-query-dependencies:graphql-jpa-query-build:graphql-jpa-query-example').projectDir = "$rootDir/graphql-jpa-query-example" as File
+project(':graphql-jpa-query-dependencies').projectDir = "$rootDir/graphql-jpa-query-dependencies" as File
+project(':graphql-jpa-query-dependencies:graphql-jpa-query-build').projectDir = "$rootDir/graphql-jpa-query-build" as File

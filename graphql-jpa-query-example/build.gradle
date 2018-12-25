@@ -1,0 +1,6 @@
+
+description = 'graphql-jpa-query-example'
+dependencies {
+  compile project(':graphql-jpa-query-dependencies:graphql-jpa-query-build:graphql-jpa-query-boot-starter')
+    system group: 'com.github.behaim', name: 'behaim', version:'0.1.0-SNAPSHOT'
+}
